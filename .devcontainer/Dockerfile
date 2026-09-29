@@ -14,7 +14,12 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
     nano \
     && rm -rf /var/lib/apt/lists/*
 
-RUN wget -q https://archive.apache.org/dist/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}.tar.gz -O /tmp/hadoop.tar.gz \
+# Use Apache's lean binary distribution for this HDFS teaching lab.
+# It omits the very large AWS SDK bundle, which we do not need here,
+# reducing the download from about 929 MB to about 471 MB.
+RUN curl --fail --location --retry 5 --retry-delay 3 --progress-bar \
+    "https://downloads.apache.org/hadoop/common/hadoop-${HADOOP_VERSION}/hadoop-${HADOOP_VERSION}-lean.tar.gz" \
+    -o /tmp/hadoop.tar.gz \
     && tar -xzf /tmp/hadoop.tar.gz -C /opt \
     && mv /opt/hadoop-${HADOOP_VERSION} /opt/hadoop \
     && rm /tmp/hadoop.tar.gz \
