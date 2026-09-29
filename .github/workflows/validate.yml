@@ -36,3 +36,20 @@ jobs:
               hdfs dfs -cat /cloudlab/test/ci.txt &&
               bash scripts/stop-hdfs.sh
             '
+
+
+      - name: Verify multi-node HDFS
+        run: |
+          docker run --rm             --entrypoint bash             -v "$PWD:/workspace"             -w /workspace             hadoop-lab:test -lc '
+              bash scripts/setup-hadoop.sh &&
+              bash scripts/multinode/setup-multinode.sh &&
+              bash scripts/multinode/start-multinode.sh &&
+              source scripts/multinode/activate.sh &&
+              hdfs dfs -mkdir -p /multilab/input &&
+              hdfs dfs -put -f data/hello.txt /multilab/input/ &&
+              hdfs fsck /multilab/input/hello.txt -files -blocks -locations &&
+              bash scripts/multinode/stop-one-datanode.sh 2 &&
+              hdfs dfs -cat /multilab/input/hello.txt &&
+              bash scripts/multinode/start-one-datanode.sh 2 &&
+              bash scripts/multinode/stop-multinode.sh
+            '
