@@ -7,7 +7,7 @@
 ## 2. 启动并检查进程
 
 ```bash
-./scripts/start-hdfs.sh
+bash scripts/start-hdfs.sh
 jps
 ```
 
