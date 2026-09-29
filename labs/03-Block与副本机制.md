@@ -7,7 +7,7 @@
 ## 2. 准备测试文件
 
 ```bash
-./scripts/start-hdfs.sh
+bash scripts/start-hdfs.sh
 hdfs dfs -mkdir -p /cloudlab/blocks
 hdfs dfs -put -f data/hello.txt /cloudlab/blocks/
 ```
