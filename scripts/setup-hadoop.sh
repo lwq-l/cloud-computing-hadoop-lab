@@ -25,6 +25,18 @@ cat > "$HADOOP_CONF_DIR/core-site.xml" <<'EOF'
     <name>fs.defaultFS</name>
     <value>hdfs://127.0.0.1:9000</value>
   </property>
+  <property>
+    <name>hadoop.security.authentication</name>
+    <value>simple</value>
+  </property>
+  <property>
+    <name>hadoop.http.authentication.type</name>
+    <value>simple</value>
+  </property>
+  <property>
+    <name>hadoop.http.staticuser.user</name>
+    <value>hadoop</value>
+  </property>
 </configuration>
 EOF
 
