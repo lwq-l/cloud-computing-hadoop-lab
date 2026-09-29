@@ -136,3 +136,37 @@ bash scripts/reset-hdfs.sh    # 清空并重新初始化 HDFS（会删除实验�
 本仓库默认采用**单机伪分布式 HDFS**。物理上只有一个 Codespace，但 NameNode、DataNode 和 SecondaryNameNode 作为独立 Java 进程运行，因此非常适合第一次学习 HDFS 的角色分工和基本命令。
 
 由于默认只有一个 DataNode，`dfs.replication` 设置为 1。实验三会解释真实多节点集群为什么通常使用多个副本；后续可再扩展为多 DataNode 教师演示环境。
+
+
+## 实验二：多节点 HDFS 与副本容错
+
+第一阶段单节点实验完成后，可以进入实验二：
+
+- 1 个 NameNode
+- 3 个 DataNode
+- HDFS 副本数 3
+- 支持单独停止某一个 DataNode
+- 验证节点故障后文件仍可读取
+
+实验指导：
+
+- [实验二：1 个 NameNode + 3 个 DataNode 多节点 HDFS](labs/04-多节点HDFS与副本容错.md)
+
+首次初始化：
+
+```bash
+bash scripts/multinode/setup-multinode.sh
+```
+
+启动：
+
+```bash
+bash scripts/multinode/start-multinode.sh
+```
+
+查看状态：
+
+```bash
+bash scripts/multinode/status-multinode.sh
+```
+
