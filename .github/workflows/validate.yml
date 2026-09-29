@@ -44,11 +44,16 @@ jobs:
               bash scripts/setup-hadoop.sh &&
               bash scripts/multinode/setup-multinode.sh &&
               bash scripts/multinode/start-multinode.sh &&
+              bash scripts/multinode/status-multinode.sh | tee /tmp/status3.txt &&
+              grep -q "Live datanodes (3)" /tmp/status3.txt &&
               source scripts/multinode/activate.sh &&
               hdfs dfs -mkdir -p /multilab/input &&
               hdfs dfs -put -f data/hello.txt /multilab/input/ &&
-              hdfs fsck /multilab/input/hello.txt -files -blocks -locations &&
+              hdfs fsck /multilab/input/hello.txt -files -blocks -locations | tee /tmp/fsck.txt &&
+              grep -q "Average block replication: 3.0" /tmp/fsck.txt &&
               bash scripts/multinode/stop-one-datanode.sh 2 &&
+              bash scripts/multinode/status-multinode.sh | tee /tmp/status2.txt &&
+              grep -q "Live datanodes (2)" /tmp/status2.txt &&
               hdfs dfs -cat /multilab/input/hello.txt &&
               bash scripts/multinode/start-one-datanode.sh 2 &&
               bash scripts/multinode/stop-multinode.sh
