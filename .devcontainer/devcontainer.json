@@ -7,7 +7,9 @@
   "remoteUser": "hadoop",
   "containerUser": "hadoop",
   "postCreateCommand": "bash scripts/setup-hadoop.sh",
-  "forwardPorts": [9870],
+  "forwardPorts": [
+    9870
+  ],
   "portsAttributes": {
     "9870": {
       "label": "HDFS NameNode Web UI",
@@ -20,5 +22,8 @@
         "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
+  },
+  "features": {
+    "ghcr.io/devcontainers/features/git:1": {}
   }
 }
