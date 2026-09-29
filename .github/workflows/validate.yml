@@ -1,0 +1,38 @@
+name: Validate Hadoop lab image
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '.devcontainer/**'
+      - 'scripts/**'
+      - '.github/workflows/validate.yml'
+  workflow_dispatch:
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build teaching image
+        run: docker build -f .devcontainer/Dockerfile -t hadoop-lab:test .
+
+      - name: Verify Java and Hadoop
+        run: |
+          docker run --rm --entrypoint bash hadoop-lab:test -lc 'java -version && hadoop version'
+
+      - name: Verify lab setup and single-node HDFS
+        run: |
+          docker run --rm             --entrypoint bash             -v "$PWD:/workspace"             -w /workspace             hadoop-lab:test -lc '
+              bash scripts/setup-hadoop.sh &&
+              bash scripts/start-hdfs.sh &&
+              jps &&
+              hdfs dfsadmin -report &&
+              hdfs dfs -mkdir -p /cloudlab/test &&
+              echo "CI Hadoop test" > /tmp/ci.txt &&
+              hdfs dfs -put -f /tmp/ci.txt /cloudlab/test/ &&
+              hdfs dfs -cat /cloudlab/test/ci.txt &&
+              bash scripts/stop-hdfs.sh
+            '
