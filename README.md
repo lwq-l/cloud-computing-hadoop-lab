@@ -31,7 +31,7 @@ java -version
 然后启动 HDFS：
 
 ```bash
-./scripts/start-hdfs.sh
+bash scripts/start-hdfs.sh
 ```
 
 检查进程：
@@ -123,10 +123,10 @@ HDFS 启动后，Codespaces 会自动转发 **9870** 端口。
 ## 常用脚本
 
 ```bash
-./scripts/start-hdfs.sh    # 启动 HDFS
-./scripts/stop-hdfs.sh     # 停止 HDFS
-./scripts/status.sh        # 查看 Hadoop Java 进程与 DataNode 状态
-./scripts/reset-hdfs.sh    # 清空并重新初始化 HDFS（会删除实验数据）
+bash scripts/start-hdfs.sh    # 启动 HDFS
+bash scripts/stop-hdfs.sh     # 停止 HDFS
+bash scripts/status.sh        # 查看 Hadoop Java 进程与 DataNode 状态
+bash scripts/reset-hdfs.sh    # 清空并重新初始化 HDFS（会删除实验数据）
 ```
 
 > **注意：** `reset-hdfs.sh` 会删除当前 HDFS 中的全部实验数据，只在需要完全重做实验时使用。
