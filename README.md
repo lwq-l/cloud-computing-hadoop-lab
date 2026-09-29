@@ -103,15 +103,27 @@ hdfs dfs -rm /cloudlab/input/hello.txt
 
 ## NameNode Web UI
 
-HDFS 启动后，Codespaces 会自动转发 **9870** 端口。
+HDFS 启动后，推荐直接使用 **VS Code 集成浏览器** 访问 NameNode 页面，这种方式不依赖 Codespaces 外部端口认证。
 
-在 VS Code 的 **PORTS / 端口** 面板中找到：
+1. 按 `Ctrl+Shift+P`（macOS 可用 `Cmd+Shift+P`）。
+2. 搜索并执行 **Browser: Open Integrated Browser**。
+3. 输入：
 
 ```text
-9870  HDFS NameNode Web UI
+http://127.0.0.1:9870/dfshealth.html
 ```
 
-点击浏览器图标即可打开 NameNode 管理页面。
+正常情况下即可看到 HDFS NameNode 管理页面。
+
+也可以在终端先验证：
+
+```bash
+curl -I http://127.0.0.1:9870/
+```
+
+若返回 `HTTP/1.1 200` 或 `HTTP/1.1 302`，说明 NameNode Web 服务本身正常。
+
+> 备用方式：Codespaces 仍会自动转发 9870 端口，但部分浏览器环境可能出现外部转发页面 401。课堂实验优先使用集成浏览器。
 
 ## 实验目录
 
