@@ -4,14 +4,9 @@
     "dockerfile": "Dockerfile",
     "context": ".."
   },
-  "remoteUser": "vscode",
-  "containerEnv": {
-    "JAVA_HOME": "/usr/lib/jvm/java-11-openjdk-amd64",
-    "HADOOP_HOME": "/opt/hadoop",
-    "HADOOP_CONF_DIR": "/opt/hadoop/etc/hadoop"
-  },
+  "remoteUser": "hadoop",
+  "containerUser": "hadoop",
   "postCreateCommand": "bash scripts/setup-hadoop.sh",
-  "postStartCommand": "sudo /usr/sbin/sshd || true",
   "forwardPorts": [9870],
   "portsAttributes": {
     "9870": {
