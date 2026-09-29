@@ -30,6 +30,7 @@ jobs:
               bash scripts/start-hdfs.sh &&
               jps &&
               hdfs dfsadmin -report &&
+              curl -fsSI http://127.0.0.1:9870/ | head -n 1 &&
               hdfs dfs -mkdir -p /cloudlab/test &&
               echo "CI Hadoop test" > /tmp/ci.txt &&
               hdfs dfs -put -f /tmp/ci.txt /cloudlab/test/ &&
