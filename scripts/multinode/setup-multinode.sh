@@ -78,6 +78,14 @@ write_hdfs_site() {
     <name>dfs.permissions.enabled</name>
     <value>false</value>
   </property>
+  <property>
+    <name>dfs.heartbeat.interval</name>
+    <value>1</value>
+  </property>
+  <property>
+    <name>dfs.namenode.heartbeat.recheck-interval</name>
+    <value>1000</value>
+  </property>
 </configuration>
 EOF
 }
