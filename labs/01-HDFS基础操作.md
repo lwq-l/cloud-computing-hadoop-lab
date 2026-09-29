@@ -9,7 +9,7 @@
 ```bash
 java -version
 hadoop version
-./scripts/start-hdfs.sh
+bash scripts/start-hdfs.sh
 jps
 ```
 
