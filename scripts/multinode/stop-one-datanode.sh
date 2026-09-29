@@ -14,7 +14,8 @@ ID="$1"
 
 HADOOP_CONF_DIR="$BASE/conf/dn$ID" HADOOP_IDENT_STRING="multi-dn$ID" HADOOP_LOG_DIR="$BASE/logs/dn$ID" hdfs --daemon stop datanode
 
-sleep 3
+echo "Waiting about 15 seconds for NameNode failure detection..."
+sleep 15
 echo "DataNode-$ID stopped."
 echo
 HADOOP_CONF_DIR="$BASE/conf/client" hdfs dfsadmin -report | sed -n '1,70p'
