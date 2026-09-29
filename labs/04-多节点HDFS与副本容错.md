@@ -129,6 +129,8 @@ Average block replication: 3.0
 bash scripts/multinode/stop-one-datanode.sh 2
 ```
 
+脚本会等待约 15 秒，让 NameNode 将停止心跳的节点判定为失效。
+
 再次查看：
 
 ```bash
