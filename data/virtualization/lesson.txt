@@ -1,0 +1,3 @@
+Cloud Computing - Chapter 5: Compute Virtualization
+Docker containers share a host kernel; containers are not full virtual machines.
+CPU, memory and I/O isolation can be observed with cgroups and volumes.
