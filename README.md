@@ -1,5 +1,19 @@
 # 云计算技术及应用：Hadoop / HDFS 在线实验平台
 
+## 国内浏览器上机入口（CNB）
+
+正式课程仓库：https://cnb.cool/cloud-computing-lab/cloud-computing-hadoop-lab
+
+使用 CNB 登录后，按教师安排进入个人可开发仓库/工作区，在浏览器内完成实验，不需要在本机安装虚拟机、Hadoop 或 Docker Desktop。不要将教师个人临时 WebIDE 链接作为全班共用入口。
+
+- [第3、4章 CNB 上机指南](labs/CNB-第3章与第4章学生上机指南.md)
+- [第5章《计算虚拟化》实践作业（三）](labs/06-计算虚拟化综合实践.md)
+- [第五章启动与教师核查说明](README-CH05.md)
+
+第三、四章 HDFS/负载均衡、第五章 Docker 镜像、容器、数据卷已完成教师端运行检查。当前 Docker 环境的 CPU/内存配额配置可读取，但尚未证明内核强制执行配额；第五章评分标准已作相应调整。学生须保留自己的截图和报告，工作区数据不能替代个人备份。
+
+---
+
 本仓库用于《云计算技术及应用》《分布式系统》课程的 Hadoop/HDFS 实践教学。
 
 学生**不需要在本机安装 Linux、JDK 或 Hadoop**。点击下面的按钮即可在浏览器中启动 GitHub Codespaces 实验环境。
