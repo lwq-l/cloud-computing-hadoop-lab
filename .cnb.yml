@@ -1,0 +1,15 @@
+# 国内浏览器实验环境候选配置（CNB 云原生开发）
+# 从 GitHub 导入 CNB 后，需先由教师实际验证镜像构建、
+# HDFS 单节点、三 DataNode 和 Web 负载均衡，才可发给学生。
+$:
+  vscode:
+    - runner:
+        cpus: 4
+      docker:
+        build: .devcontainer/Dockerfile
+      services:
+        - vscode
+        - docker
+      stages:
+        - name: 配置 Hadoop 教学环境
+          script: bash scripts/preflight-cnb.sh
