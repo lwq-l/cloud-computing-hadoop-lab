@@ -7,7 +7,7 @@
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from threading import Thread
 from urllib.error import HTTPError
-from urllib.request import Request, urlopen
+from urllib.request import ProxyHandler, Request, build_opener
 
 
 class LessonHandler(BaseHTTPRequestHandler):
@@ -30,7 +30,7 @@ class LessonHandler(BaseHTTPRequestHandler):
 def request(url, segment):
     req = Request(url, headers={"X-CH6-Segment": segment})
     try:
-        with urlopen(req, timeout=3) as response:
+        with build_opener(ProxyHandler({})).open(req, timeout=3) as response:
             return response.status, response.read().decode("utf-8")
     except HTTPError as exc:
         return exc.code, exc.read().decode("utf-8")
