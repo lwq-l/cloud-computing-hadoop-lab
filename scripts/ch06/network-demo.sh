@@ -57,6 +57,12 @@ case "$MODE" in
     else
       echo "WARNING: even Docker --network none is unavailable in this environment."
     fi
+    echo "[Default bridge] inspect container interfaces:"
+    if docker run --rm --network bridge "$IMAGE" sh -c 'ls /sys/class/net'; then
+      echo "PASS: built-in Docker bridge mode observed."
+    else
+      echo "WARNING: built-in bridge mode is also restricted here."
+    fi
     echo "=== Docker networks ==="
     docker network ls
     ;;
