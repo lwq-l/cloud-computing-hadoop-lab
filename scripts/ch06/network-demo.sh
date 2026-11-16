@@ -7,6 +7,21 @@ SERVER="${CH6_SERVER:-ch6-web}"
 IMAGE="alpine:3.22"
 MODE="${1:-help}"
 docker_ok() { command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; }
+container_ip() {
+  docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' "$SERVER" 2>/dev/null || true
+}
+invalid_ip() {
+  case "$1" in
+    ""|"invalid IP"|"<nil>"|"0.0.0.0") return 0 ;;
+    *) return 1 ;;
+  esac
+}
+run_fallback() {
+  echo "MODE=FALLBACK"
+  echo "Reason: Docker bridge communication could not be verified."
+  echo "Running local HTTP with an application-level access rule."
+  python3 scripts/ch06/network-fallback.py
+}
 if ! docker_ok; then
   echo "ERROR: Docker unavailable; use the CNB terminal." >&2
   exit 2
@@ -19,49 +34,91 @@ ensure_net() {
 case "$MODE" in
   setup)
     if ! ensure_net "$NET_A"; then
-      echo "BRIDGE_UNAVAILABLE: custom networks are restricted. Use fallback and the Python concept demo."
+      echo "BRIDGE_UNAVAILABLE: custom bridge creation failed."
+      echo "MODE=FALLBACK"
       exit 0
     fi
     if ! ensure_net "$NET_B"; then
-      echo "BRIDGE_UNAVAILABLE: unable to create second network. Use fallback."
+      echo "BRIDGE_UNAVAILABLE: unable to create second bridge."
+      echo "MODE=FALLBACK"
       exit 0
     fi
     if ! docker container inspect "$SERVER" >/dev/null 2>&1; then
-      docker run -d --name "$SERVER" --network "$NET_A" "$IMAGE" sh -c 'mkdir -p /www; echo CH6_NETWORK_OK > /www/index.html; busybox httpd -f -p 8080 -h /www' >/dev/null
+      if ! docker run -d --name "$SERVER" --network "$NET_A" "$IMAGE" sh -c 'mkdir -p /www; echo CH6_NETWORK_OK > /www/index.html; busybox httpd -f -p 8080 -h /www' >/dev/null; then
+        echo "BRIDGE_UNUSABLE: web container could not start on custom bridge."
+        echo "MODE=FALLBACK"
+        exit 0
+      fi
     elif [ "$(docker inspect -f '{{.State.Running}}' "$SERVER")" != "true" ]; then
-      docker start "$SERVER" >/dev/null
+      if ! docker start "$SERVER" >/dev/null; then
+        echo "BRIDGE_UNUSABLE: existing web container could not start."
+        echo "MODE=FALLBACK"
+        exit 0
+      fi
     fi
-    echo "MODE=BRIDGE"
+    ip="$(container_ip)"
+    if invalid_ip "$ip"; then
+      echo "BRIDGE_UNUSABLE: container IP is '$ip' (network created, but unusable)."
+      echo "MODE=FALLBACK"
+    else
+      echo "MODE=BRIDGE_CANDIDATE (IP present; communication not yet verified)"
+      echo "ServerIP=$ip"
+    fi
     docker network ls --filter "name=ch6-"
     docker ps --filter "name=$SERVER"
     ;;
   test)
-    if docker network inspect "$NET_A" >/dev/null 2>&1 && docker network inspect "$NET_B" >/dev/null 2>&1 && docker inspect "$SERVER" >/dev/null 2>&1; then
-      echo "[Same virtual network] client -> server:"
-      response="$(docker run --rm --network "$NET_A" "$IMAGE" wget -T 5 -q -O - "http://$SERVER:8080/" 2>&1)" || { echo "ERROR: same-network web request failed: $response" >&2; exit 3; }
-      echo "$response"
-      case "$response" in *CH6_NETWORK_OK*) echo "PASS: same-network service discovery and HTTP";; *) echo "FAIL: unexpected web response"; exit 4;; esac
-      echo "[Different virtual networks] name resolution check:"
-      if docker run --rm --network "$NET_B" "$IMAGE" wget -T 3 -q -O - "http://$SERVER:8080/" >/dev/null 2>&1; then
-        echo "WARNING: other-network name unexpectedly reachable; do not claim isolation."
+    bridge_pass=0
+    if docker network inspect "$NET_A" >/dev/null 2>&1 &&
+       docker network inspect "$NET_B" >/dev/null 2>&1 &&
+       docker container inspect "$SERVER" >/dev/null 2>&1; then
+      ip="$(container_ip)"
+      if invalid_ip "$ip"; then
+        echo "BRIDGE_UNUSABLE: container IP is '$ip'; skip DNS-dependent HTTP test."
       else
-        echo "OBSERVED: service name is not reachable from the second network."
+        echo "[Same virtual network] client -> server:"
+        if response="$(docker run --rm --network "$NET_A" "$IMAGE" wget -T 5 -q -O - "http://$SERVER:8080/" 2>&1)"; then
+          echo "$response"
+          case "$response" in
+            *CH6_NETWORK_OK*)
+              echo "PASS: same-network service discovery and HTTP"
+              bridge_pass=1
+              ;;
+            *)
+              echo "BRIDGE_UNUSABLE: HTTP response did not contain CH6_NETWORK_OK."
+              ;;
+          esac
+        else
+          echo "BRIDGE_UNUSABLE: same-network HTTP request failed: $response"
+        fi
       fi
-      echo "NOTE: failure by hostname alone is not proof of IP-level isolation or security policy."
+      if [ "$bridge_pass" -eq 1 ]; then
+        echo "MODE=BRIDGE_VERIFIED"
+        echo "[Different virtual networks] name resolution:"
+        if docker run --rm --network "$NET_B" "$IMAGE" wget -T 3 -q -O - "http://$SERVER:8080/" >/dev/null 2>&1; then
+          echo "WARNING: other-network service unexpectedly reachable by name; investigate."
+        else
+          echo "OBSERVED: service name is not reachable from the second network."
+        fi
+        echo "NOTE: name lookup failure alone does not prove all IP-level isolation."
+      fi
     else
-      echo "MODE=FALLBACK: custom bridge was not created; compare built-in Docker network modes."
+      echo "BRIDGE_UNAVAILABLE: custom networks or server container missing."
     fi
-    echo "[No network] inspect container interfaces:"
+    if [ "$bridge_pass" -eq 0 ]; then
+      run_fallback
+    fi
+    echo "[No-network Docker mode] interface observation:"
     if docker run --rm --network none "$IMAGE" sh -c 'ls /sys/class/net'; then
-      echo "PASS: --network none mode observed."
+      echo "PASS: Docker --network none interface observation."
     else
-      echo "WARNING: even Docker --network none is unavailable in this environment."
+      echo "WARNING: Docker --network none interface observation unavailable."
     fi
-    echo "[Default bridge] inspect container interfaces:"
+    echo "[Default bridge Docker mode] interface observation:"
     if docker run --rm --network bridge "$IMAGE" sh -c 'ls /sys/class/net'; then
-      echo "PASS: built-in Docker bridge mode observed."
+      echo "PASS: Docker default bridge interface observation."
     else
-      echo "WARNING: built-in bridge mode is also restricted here."
+      echo "WARNING: Docker default bridge observation unavailable."
     fi
     echo "=== Docker networks ==="
     docker network ls
