@@ -20,7 +20,7 @@ fi
 docker version --format 'Client={{.Client.Version}} Server={{.Server.Version}}'
 docker info --format 'CgroupDriver={{.CgroupDriver}} CgroupVersion={{.CgroupVersion}}'
 docker network ls
-for p in scripts/ch06/network-demo.sh scripts/ch06/network-sim.py scripts/ch06/storage-demo.py scripts/ch06/cloud-storage-demo.py scripts/ch06/cleanup.sh; do
+for p in scripts/ch06/network-demo.sh scripts/ch06/network-fallback.py scripts/ch06/network-sim.py scripts/ch06/storage-demo.py scripts/ch06/cloud-storage-demo.py scripts/ch06/cleanup.sh; do
   test -f "$p" || { echo "ERROR: missing $p" >&2; exit 4; }
 done
 echo "PASS: CH6 prerequisites found."
