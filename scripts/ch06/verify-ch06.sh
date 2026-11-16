@@ -21,8 +21,16 @@ echo "PASS: Alpine image available"
 echo "[3/7] Network exercise (fallback is supported)"
 bash scripts/ch06/network-demo.sh setup
 bash scripts/ch06/network-demo.sh status
-bash scripts/ch06/network-demo.sh test
-echo "NOTE: if custom bridge is unavailable, this only validates the fallback."
+network_result="$(bash scripts/ch06/network-demo.sh test)"
+printf '%s\n' "$network_result"
+if [[ "$network_result" == *"MODE=BRIDGE_VERIFIED"* ]]; then
+  echo "PASS: CH6 actual Docker bridge HTTP test."
+elif [[ "$network_result" == *"PASS: CH6 fallback HTTP and application-policy demo."* ]]; then
+  echo "PASS: CH6 localhost HTTP fallback. Docker bridge networking is NOT validated."
+else
+  echo "FAIL: neither real bridge HTTP nor fallback HTTP was verified." >&2
+  exit 5
+fi
 
 echo "[4/7] Logical network example"
 python3 scripts/ch06/network-sim.py | grep -F "PASS: CH6 network concept demo finished."
