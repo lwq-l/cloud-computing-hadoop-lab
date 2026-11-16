@@ -74,6 +74,7 @@ case "$MODE" in
     fi
     if docker container inspect "$SERVER" >/dev/null 2>&1; then
       docker inspect -f 'Container={{.Name}} NetworkMode={{.HostConfig.NetworkMode}}' "$SERVER"
+      docker inspect -f '{{range .NetworkSettings.Networks}}NetworkID={{.NetworkID}} ContainerIP={{.IPAddress}}{{end}}' "$SERVER"
     fi
     ;;
   cleanup)
